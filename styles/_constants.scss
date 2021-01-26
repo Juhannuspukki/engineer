@@ -1,0 +1,13 @@
+$white-color: #FFFFFF;
+$blue-color: #2c7cb1;
+
+$outer-shadow: 9px 9px 16px 0 rgba(27,79,112,0.50), -9px -9px 16px 0 rgba(84,167,231,0.50);
+$inner-shadow: inset -9px -9px 16px 0 rgba(84,167,231,0.50), inset 9px 9px 16px 0 rgba(27,79,112,0.50);
+
+$font: 'Exo', 'Helvetica', 'sans-serif';
+
+@font-face {
+  font-family: "Exo";
+  font-display: fallback;
+  src: url('/fonts/Exo-VariableFont_wght.ttf') format('truetype');
+}
