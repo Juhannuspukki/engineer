@@ -105,7 +105,7 @@ export default function Home() {
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    fetch(process.env.NODE_ENV === 'production' ? "http://tools.ftl-industries.now.sh/api/hello" : "http://localhost:3000/api/hello")
+    fetch(process.env.NODE_ENV === 'production' ? "http://ftl-tools.now.sh/api/hello" : "http://localhost:3000/api/hello")
         .then(res => res.json())
         .then(
             (result) => {
