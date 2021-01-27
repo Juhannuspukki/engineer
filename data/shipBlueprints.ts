@@ -2013,8 +2013,8 @@ const shipBlueprints = [
         "debrisCount": 4,
         "datacoreOneCount": 13,
         "datacoreOneType": "Amarrian Starship Engineering",
-        "datacoreTwoCount": "",
-        "datacoreTwoType": 13
+        "datacoreTwoCount": 13,
+        "datacoreTwoType": "Laser Physics"
     },
     {
         "name": "Myrmidon",

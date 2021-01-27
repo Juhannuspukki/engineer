@@ -3,33 +3,6 @@ import SkillDropdown from "../components/skillDropdown"
 import Fuse from 'fuse.js'
 import ShipBlueprints from "../data/shipBlueprints"
 
-const basicSkillMultiplier = {
-  0: 0,
-  1: 0,
-  2: 12,
-  3: 24,
-  4: 36,
-  5: 50,
-};
-
-const advancedSkillMultiplier = {
-  0: 0,
-  1: 0,
-  2: 0,
-  3: 10,
-  4: 20,
-  5: 30,
-};
-
-const expertSkillMultiplier = {
-  0: 0,
-  1: 0,
-  2: 0,
-  3: 6,
-  4: 12,
-  5: 20,
-};
-
 interface MarketData {
   item_id: string,
   name: string,
@@ -55,34 +28,84 @@ interface Ship {
   datacoreTwoType: string,
 }
 
-const formatCurrency = (amount: number) => {
-  return amount.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, " ")
-}
+const basicSkillMultiplier: {[index: number]:number} = {
+  0: 0,
+  1: 0,
+  2: 12,
+  3: 24,
+  4: 36,
+  5: 50,
+};
+
+const advancedSkillMultiplier: {[index: number]:number} = {
+  0: 0,
+  1: 0,
+  2: 0,
+  3: 10,
+  4: 20,
+  5: 30,
+};
+
+const expertSkillMultiplier: {[index: number]:number} = {
+  0: 0,
+  1: 0,
+  2: 0,
+  3: 6,
+  4: 12,
+  5: 20,
+};
+
+const stringToNumber = (amount: string, max?: number ) => {
+  // Remove all characters that are not numbers or whitespaces
+  amount = amount.replace(/[^\d\s.]/g, '')
+  // Assume value is zero if string is empty
+  if (amount === "") {
+    return 0
+  } else {
+    // Create a number from string
+    const number = parseFloat(amount.replace(/ /g, ''))
+    // If max value ise defined, return number no higher than max value
+    return max !== undefined && number > max ? max : number
+  }
+};
+
+const formatInput = (amount: string, max?: number) => (
+    // Change value to number and back again to remove existing whitespaces
+    // If this is not done, the input field will have extra whitespaces
+    // If input is empty, let it be empty (will otherwise return NaN and freeze the field)
+    amount === "" ? "" : stringToNumber(amount, max).toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ")
+);
+
+const formatOutput = (amount: number) => (
+    amount.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, " ")
+);
 
 export default function Home() {
-  const [basicSkillLevel, setBasicSkillLevel] = useState(0);
-  const [advancedSkillLevel, setAdvancedSkillLevel] = useState(0);
-  const [expertSkillLevel, setExpertSkillLevel] = useState(0);
-  const [facilityBonus, setFacilityBonus] = useState(0);
+  const [basicSkillLevel, setBasicSkillLevel] = useState<number>(0);
+  const [advancedSkillLevel, setAdvancedSkillLevel] = useState<number>(0);
+  const [expertSkillLevel, setExpertSkillLevel] = useState<number>(0);
+  const [facilityBonus, setFacilityBonus] = useState<number>(0);
 
-  const [searchString, setSearchString] = useState("");
-  const [searchIsOpen, setSearchIsOpen] = useState(false);
-  const [condensedMode, setCondensedMode] = useState(1);
+  const [searchString, setSearchString] = useState<string>("");
+  const [searchIsOpen, setSearchIsOpen] = useState<boolean>(false);
+  const [condensedMode, setCondensedMode] = useState<number>(1);
 
-  const [activeShip, setActiveShip] = useState({});
+  const [activeShip, setActiveShip] = useState<Ship | null>(null);
 
-  const [datacoreOnePrice, setDatacoreOnePrice] = useState(0);
-  const [datacoreTwoPrice, setDatacoreTwoPrice] = useState(0);
-  const [debrisPrice, setDebrisPrice] = useState(0);
+  const [marketData, setMarketData] = useState<MarketData[] | null>(null);
 
-  const [salesPrice, setSalesPrice] = useState(0);
+  const [datacoreOnePrice, setDatacoreOnePrice] = useState<string>("0");
+  const [datacoreTwoPrice, setDatacoreTwoPrice] = useState<string>("0");
+  const [debrisPrice, setDebrisPrice] = useState<string>("0");
+  const [salesPrice, setSalesPrice] = useState<string>("0");
+
+  const [debrisCount, setDebrisCount] = useState<string>("0");
 
   const [error, setError] = useState(null);
   const [isLoaded, setIsLoaded] = useState(false);
-  const [marketData, setMarketData] = useState([]);
 
   useEffect(() => {
-    fetch("http://localhost:3000/api/hello")
+    fetch(process.env.NODE_ENV === 'production' ? "http://tools.ftl-industries.now.sh/api/hello" : "http://localhost:3000/api/hello")
         .then(res => res.json())
         .then(
             (result) => {
@@ -105,19 +128,27 @@ export default function Home() {
 
   const results = fuse.search(searchString);
 
-  const dataCoreOneTotalCost: number = activeShip.datacoreOneCount * datacoreOnePrice;
-  const dataCoreTwoTotalCost: number = activeShip.datacoreTwoCount * datacoreTwoPrice;
+  const dataCoreOneTotalCost: number = activeShip === null ? 0: activeShip.datacoreOneCount * stringToNumber(datacoreOnePrice);
+  const dataCoreTwoTotalCost: number = activeShip === null ? 0: activeShip.datacoreTwoCount * stringToNumber(datacoreTwoPrice);
+  const debrisTotalCost: number = stringToNumber(debrisCount) * stringToNumber(debrisPrice);
 
   useEffect(
-      () => {
-        if (Object.keys(activeShip).length !== 0) {
-          setDatacoreOnePrice(parseFloat(marketData.find(element => element.name === "Datacore - " + activeShip.datacoreOneType).highest_buy));
-          setDatacoreTwoPrice(parseFloat(marketData.find(element => element.name === "Datacore - " + activeShip.datacoreTwoType).highest_buy));
-          setDebrisPrice(parseFloat(marketData.find(element => element.name === activeShip.debrisType).highest_buy));
-          setSalesPrice(parseFloat(marketData.find(element => element.name ===  activeShip.name + " Blueprint").lowest_sell));
-        }
-      },
-      [activeShip],
+    () => {
+      if (activeShip !== null && marketData !== null) {
+        const datacoreOnePrice = marketData.find((element: MarketData) => element.name === "Datacore - " + activeShip.datacoreOneType);
+        const datacoreTwoPrice = marketData.find((element: MarketData) => element.name === "Datacore - " + activeShip.datacoreTwoType);
+        const debrisPrice = marketData.find((element: MarketData) => element.name === activeShip.debrisType);
+        const blueprintPrice = marketData.find((element: MarketData) => element.name ===  activeShip.name + " Blueprint");
+
+        setDatacoreOnePrice(datacoreOnePrice === undefined ? "NaN" : formatInput(datacoreOnePrice.highest_buy));
+        setDatacoreTwoPrice(datacoreTwoPrice === undefined ? "NaN" : formatInput(datacoreTwoPrice.highest_buy));
+        setDebrisPrice(debrisPrice === undefined ? "NaN" : formatInput(debrisPrice.highest_buy));
+        setSalesPrice(blueprintPrice === undefined ? "NaN" : formatInput(blueprintPrice.lowest_sell));
+
+        setDebrisCount(formatInput(activeShip.debrisCount.toString()))
+      }
+    },
+    [activeShip],
   );
 
   const successMultiplier: number =
@@ -126,32 +157,21 @@ export default function Home() {
       + expertSkillMultiplier[expertSkillLevel]
       + facilityBonus;
 
-  const calculateMinimumCost = () => {
-    const costs: number[] = [];
-    let i: number;
-    for (i = 1; i <= activeShip.debrisCount; i++) {
-      // Calculate probability of success with variable amounts of debris
-      const probability: number = (activeShip.successRate / (activeShip.debrisCount) * i) * (1 + successMultiplier / 100);
-      // Then calculate how much is the average cost per run with that amount of debris
-      const cost: number = 1 / ((probability > 100 ? 100 : probability) * 0.01) * (debrisPrice * i + dataCoreOneTotalCost + dataCoreTwoTotalCost + activeShip.iskCost);
-      // Add to an array of costs
-      costs.push(cost)
-    }
-    // Return the smallest possible cost and the index of smallest possible cost
-    return [Math.min(...costs), costs.indexOf(Math.min(...costs)) + 1];
-  }
-
-  const minimumCost: number = calculateMinimumCost()[0];
-  const debrisForMinimumCost: number = calculateMinimumCost()[1];
-
-  const debrisTotalCost: number = debrisForMinimumCost * debrisPrice;
-
   const calculateSuccessChance = () => {
-    // Calculate probability of success with max amount of debris
-    return activeShip.successRate * (1 + successMultiplier / 100);
+    if (activeShip === null) {
+      throw "activeShip is not defined";
+    }
+    // Calculate probability of success with user-defined amount of debris
+    const success = activeShip.successRate * (stringToNumber(debrisCount) / activeShip.debrisCount) * (1 + successMultiplier / 100);
+    return success > 100 ? 100 : success
   };
 
-  console.log(activeShip);
+  const calculateCost = () => {
+    if (activeShip === null) {
+      throw "activeShip is not defined"
+    }
+    return 1 / (calculateSuccessChance() * 0.01) * (stringToNumber(debrisPrice) * stringToNumber(debrisCount) + dataCoreOneTotalCost + dataCoreTwoTotalCost + activeShip.iskCost);
+  };
 
   return (
     <main>
@@ -235,22 +255,38 @@ export default function Home() {
             }
           </div>
         </div>
-        {Object.keys(activeShip).length !== 0 &&
+        {activeShip !== null &&
         <>
-          {!condensedMode &&
+          <h2>Success Rate</h2>
+          <div className={"row"}>
+            <div className={"col-6"}>
+              <label>
+                Success Chance
+                <p className={"content-text"}>{Math.round(calculateSuccessChance())} %</p>
+              </label>
+            </div>
+            <div className={"col-6"}>
+              <label>
+                Facility And Skill Bonuses
+                <p className={"content-text"}>+ {successMultiplier} %</p>
+              </label>
+            </div>
+          </div>
+        {!condensedMode &&
           <>
-            <h2>Success Rate</h2>
+            <h2>Debris count</h2>
             <div className={"row"}>
-              <div className={"col-6"}>
+              <div className={"col-md-4"}>
                 <label>
-                  Success Chance
-                  <p className={"content-text"}>{Math.round(calculateSuccessChance())} %</p>
-                </label>
-              </div>
-              <div className={"col-6"}>
-                <label>
-                  Facility And Skill Bonuses
-                  <p className={"content-text"}>+ {successMultiplier} %</p>
+                  Debris Used
+                  <input
+                      className={"text-input small"}
+                      type={"text"}
+                      step={1}
+                      value={stringToNumber(debrisCount)}
+                      onChange={(e) => setDebrisCount(formatInput(e.target.value, activeShip.debrisCount))}
+                  />
+                  <span className={"slash"}>/ {activeShip.debrisCount}</span>
                 </label>
               </div>
             </div>
@@ -261,7 +297,7 @@ export default function Home() {
                     {activeShip.datacoreOneType}
                     <input
                         value={datacoreOnePrice}
-                        onChange={(e) => {setDatacoreOnePrice(parseFloat(e.target.value))}}
+                        onChange={(e) => {setDatacoreOnePrice(formatInput(e.target.value))}}
                         className={"text-input medium"}
                     />
                     <span className={"factor"}>x {activeShip.datacoreOneCount}</span>
@@ -270,7 +306,7 @@ export default function Home() {
                 <div className={"col-md-5"}>
                   <label>
                     Total Datacore Price
-                    <p className={"content-text"}>{formatCurrency(dataCoreOneTotalCost)} ISK</p>
+                    <p className={"content-text"}>{formatOutput(dataCoreOneTotalCost)} ISK</p>
                   </label>
                 </div>
                 <div className={"col-md-7"}>
@@ -278,7 +314,7 @@ export default function Home() {
                     {activeShip.datacoreTwoType}
                     <input
                         value={datacoreTwoPrice}
-                        onChange={(e) => {setDatacoreTwoPrice(parseFloat(e.target.value))}}
+                        onChange={(e) => {setDatacoreTwoPrice(formatInput(e.target.value))}}
                         className={"text-input medium"}
                     />
                     <span className={"factor"}>x {activeShip.datacoreTwoCount}</span>
@@ -287,7 +323,7 @@ export default function Home() {
                 <div className={"col-md-5"}>
                   <label>
                     Total Datacore Price
-                    <p className={"content-text"}>{formatCurrency(dataCoreTwoTotalCost)} ISK</p>
+                    <p className={"content-text"}>{formatOutput(dataCoreTwoTotalCost)} ISK</p>
                   </label>
                 </div>
                 <div className={"col-md-7"}>
@@ -295,28 +331,28 @@ export default function Home() {
                     {activeShip.debrisType}
                     <input
                         value={debrisPrice}
-                        onChange={(e) => {setDebrisPrice(parseFloat(e.target.value))}}
+                        onChange={(e) => {setDebrisPrice(formatInput(e.target.value))}}
                         className={"text-input medium"}
                     />
-                    <span className={"factor"}>x {debrisForMinimumCost}/{activeShip.debrisCount}</span>
+                    <span className={"factor"}>x {debrisCount}</span>
                   </label>
                 </div>
                 <div className={"col-md-5"}>
                   <label>
                     Total Debris Price
-                    <p className={"content-text"}>{formatCurrency(debrisTotalCost)} ISK</p>
+                    <p className={"content-text"}>{formatOutput(debrisTotalCost)} ISK</p>
                   </label>
                 </div>
                 <div className={"col-md-7"}>
                   <label>
                     Reverse Engineering Fee
-                    <p className={"content-text"}>{formatCurrency(activeShip.iskCost)} ISK</p>
+                    <p className={"content-text"}>{formatOutput(activeShip.iskCost)} ISK</p>
                   </label>
                 </div>
                 <div className={"col-md-5"}>
                   <label>
                     Total Per Successful Run
-                    <p className={"content-text"}>{formatCurrency(minimumCost)} ISK</p>
+                    <p className={"content-text"}>{formatOutput(calculateCost())} ISK</p>
                   </label>
                 </div>
             </div>
@@ -329,21 +365,21 @@ export default function Home() {
               Blueprint Sales Price
               <input
                   value={salesPrice}
-                  onChange={(e) => {setSalesPrice(parseFloat(e.target.value))}}
+                  onChange={(e) => {setSalesPrice(formatInput(e.target.value))}}
                   className={"text-input"}
               />
             </label>
           </div>
           <div className={"col-8"}>
             <label>
-              Profit
-              <p className={"result-text"}>{formatCurrency(salesPrice - minimumCost)} ISK</p>
+              Total Profit
+              <p className={"result-text"}>{formatOutput(stringToNumber(salesPrice) - calculateCost())} ISK</p>
             </label>
           </div>
           <div className={"col-4"}>
             <label>
               Profit - %
-              <p className={"result-text"}>{formatCurrency((salesPrice / minimumCost - 1) * 100) } %</p>
+              <p className={"result-text"}>{formatOutput((stringToNumber(salesPrice) / calculateCost() - 1) * 100) } %</p>
             </label>
           </div>
         </div>

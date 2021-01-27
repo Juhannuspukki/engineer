@@ -19,7 +19,7 @@ select, option, input, label, p, h2, button {
 
 h2 {
   margin: 3rem 0 0;
-  font-weight: 400;
+  font-variation-settings: 'wght' 400;
 }
 
 label {
@@ -70,10 +70,10 @@ label {
   font-size: 1rem;
   width: 100%;
   &.small {
-    width: 4rem;
+    width: 6rem;
   }
   &.medium {
-    width: calc(100% - 4rem)
+    width: calc(100% - 3rem)
   }
   &.flat-bottom {
     border-radius: 0.5rem 0.5rem 0 0;
@@ -99,10 +99,19 @@ label {
   }
 }
 
+.factor {
+  display: inline-block;
+  position: absolute;
+  top: 5.3rem;
+  right: 0;
+  width: 4rem;
+  text-align: center;
+}
+
 .slash {
   position: absolute;
-  top: 4.9rem;
-  left: 5.5rem;
+  top: 5.3rem;
+  right: 1rem;
 }
 
 .content-text {
@@ -112,17 +121,12 @@ label {
 
 .result-text {
   font-size: 1.25rem;
+  font-variation-settings: 'wght' 700;
 }
 
 .cost-per-run {
   padding: 0.5rem 0;
   font-size: 1.15rem;
-}
-
-.factor {
-  position: absolute;
-  top: 5.3rem;
-  right: 2rem;
 }
 
 input::-webkit-inner-spin-button {
