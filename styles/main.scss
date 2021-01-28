@@ -8,13 +8,46 @@ body {
 }
 
 main {
-  padding-bottom: 4rem;
+  padding: 2rem 0;
+  height: 100%;
+  &.blue {
+    background-color: $blue-color;
+  }
 }
 
-select, option, input, label, p, h2, button {
+select, option, input, label, p, h1, h2, button, td, th {
   font-family: $font;
   color: $white-color;
   font-weight: 400;
+}
+
+h1 {
+  font-variation-settings: 'wght' 700;
+  margin-bottom: 0;
+}
+
+table {
+  width: 100%;
+  padding: 1rem 0;
+  border-spacing:0;
+  tr {
+    th {
+      font-variation-settings: 'wght' 700;
+      background-color: $blue-color;
+      cursor: pointer;
+    }
+    td, th {
+      font-size: 0.9rem;
+      padding: 0.5rem;
+      text-align: left;
+    }
+    &:nth-child(odd) {
+      background-color: $white-color-translucent;
+    }
+    &:hover {
+      background-color: $black-color-translucent;
+    }
+  }
 }
 
 h2 {
@@ -29,6 +62,9 @@ label {
 
 .container {
   max-width: 512px;
+  &.large-container {
+    max-width: 998px;
+  }
 }
 
 .custom-select {
@@ -63,6 +99,7 @@ label {
   z-index: 1;
   margin: 1rem 0 0;
   padding: 1.1rem 1.4rem 1rem 1.5rem;
+  -webkit-appearance: none;
   box-shadow: $inner-shadow;
   border: none;
   border-radius: 0.5rem;

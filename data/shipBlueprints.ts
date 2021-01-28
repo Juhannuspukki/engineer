@@ -1,3 +1,5 @@
+// This file contains the data to reverse engineer all the blueprints in the game
+
 const shipBlueprints = [
     {
         "name": "Griffin",

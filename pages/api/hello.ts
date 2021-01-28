@@ -22,7 +22,6 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 
     parseStream.on("finish", () => {
         // const data = data.map(({item_id, time, ...item}) => item);
-        console.log(data)
         res.statusCode = 200;
         res.json(data)
     });
