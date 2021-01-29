@@ -1,0 +1,41 @@
+name: Deploy
+
+on:
+  schedule:
+  - cron: '*/10 * * * *'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: "14"
+
+      - name: Install modules
+        run: yarn install
+
+      - name: Create access key
+        run: yarn generate-key
+        env:
+          DISCORD_LINK: ${{ secrets.DISCORD_LINK }}
+
+      - name: Install Vercel CLI
+        run: yarn add -g vercel
+
+      - name: Setup Vercel config file
+        run: |
+          mkdir -p .vercel
+          jq \
+            --arg orgId '${{ secrets.VERCEL_ORGANIZATION_ID_WEB }}' \
+            --arg projectId '${{ secrets.VERCEL_PROJECT_ID_WEB }}' \
+            '. | .orgId=$orgId | .projectId=$projectId' <<< '{}' > .vercel/project.json
+        working-directory: .
+
+      - name: Deploy to Vercel
+        run: vercel deploy --token ${{ secrets.VERCEL_TOKEN }} --prod
+        working-directory: .

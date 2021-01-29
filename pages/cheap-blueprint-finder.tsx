@@ -1,4 +1,5 @@
 import React, {useState, useEffect} from "react";
+import getConfig from 'next/config'
 import ShipBlueprints from "../data/shipBlueprints"
 import SortableTable from "../components/sortableTable";
 
@@ -27,9 +28,16 @@ const tableHeaders = [
     }
 ];
 
-const formatOutput = (amount: number) => (
-    amount.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, " ")
-);
+const { serverRuntimeConfig, publicRuntimeConfig } = getConfig();
+console.log(serverRuntimeConfig.mySecret);
+
+let crypto;
+try {
+    crypto = require('crypto');
+} catch (err) {
+    console.log('crypto support is disabled!');
+}
+
 
 export default function Home() {
 

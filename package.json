@@ -5,7 +5,9 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "generate-key": "node ./scripts/keygen.js"
+  
   },
   "dependencies": {
     "fuse.js": "^6.4.6",
@@ -13,7 +15,8 @@
     "papaparse": "^5.3.0",
     "react": "17.0.1",
     "react-dom": "17.0.1",
-    "sass": "^1.32.5"
+    "sass": "^1.32.5",
+    "uuid": "^8.3.2"
   },
   "devDependencies": {
     "@types/node": "^14.14.22",
