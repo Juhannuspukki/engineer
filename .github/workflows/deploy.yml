@@ -1,8 +1,11 @@
 name: Deploy
 
 on:
+  push:
+    branches:
+      - master
   schedule:
-  - cron: '* * * * *'
+  - cron: '*/5 * * * *'
 
 jobs:
   deploy:
@@ -25,7 +28,7 @@ jobs:
           DISCORD_LINK: ${{ secrets.DISCORD_LINK }}
 
       - name: Install Vercel CLI
-        run: yarn add -g vercel
+        run: yarn add global vercel
 
       - name: Setup Vercel config file
         run: |
