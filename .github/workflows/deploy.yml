@@ -5,7 +5,7 @@ on:
     branches:
       - master
   schedule:
-  - cron: '*/5 * * * *'
+  - cron: '0 0 * * *'
 
 jobs:
   deploy:
@@ -26,6 +26,9 @@ jobs:
         run: yarn generate-key
         env:
           DISCORD_LINK: ${{ secrets.DISCORD_LINK }}
+
+      - name: Update market data
+        run: yarn update-market-data
 
       - name: Install Vercel CLI
         run: yarn add global vercel

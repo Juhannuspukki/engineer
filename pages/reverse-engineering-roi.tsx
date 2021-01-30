@@ -1,17 +1,16 @@
 import React from "react";
 import { withIronSession } from "next-iron-session";
-import marketData from "../data/marketData";
-import itemIdentifiers from "../data/itemIdentifiers";
 import SortableTable from "../components/sortableTable";
 import Layout from "../components/Layout";
+import reverseEngineeringROI from "../data/reverseEngineeringROI";
 
 interface DataProps {
-  filteredResults: MarketData[];
+  ships: Ship[];
 }
 
-interface MarketData {
-  item_id: string;
+interface Ship {
   name: string;
+  successRate: string;
   lowest_sell: string;
   highest_buy: string;
 }
@@ -22,7 +21,11 @@ const tableHeaders = [
     id: "name",
   },
   {
-    name: "Buy Ƶ",
+    name: "Chance %",
+    id: "successRate",
+  },
+  {
+    name: "Cost Per Run Ƶ",
     id: "buy",
   },
   {
@@ -39,14 +42,14 @@ const tableHeaders = [
   },
 ];
 
-const TradeFinder: React.FC<DataProps> = ({ filteredResults }) => {
+const ReverseEngineeringRoi: React.FC<DataProps> = ({ ships }) => {
   return (
     <Layout>
       <div className={"container large-container"}>
         <div className={"padded-container"}>
-          <h1>Trade Finder</h1>
-          {filteredResults !== null && (
-            <SortableTable data={filteredResults} tableHeaders={tableHeaders} />
+          <h1>Reverse Engineering ROI</h1>
+          {ships !== undefined && (
+            <SortableTable data={ships} tableHeaders={tableHeaders} />
           )}
         </div>
       </div>
@@ -59,21 +62,16 @@ export const getServerSideProps = withIronSession(
     const user = req.session.get("user");
 
     if (user === undefined) {
-      res.setHeader("location", "/login?redirect=trade-finder");
+      res.setHeader("location", "/login?redirect=reverse-engineering-roi");
       res.statusCode = 302;
       res.end();
       return { props: {} };
     }
 
-    const idList = itemIdentifiers.map((item) => item.id.toString());
-
-    const filteredResults = marketData.filter(
-      (item: MarketData) =>
-        idList.includes(item.item_id) && !item.name.includes("Civilian")
-    );
+    const ships = reverseEngineeringROI;
 
     return {
-      props: { filteredResults },
+      props: { ships },
     };
   },
   {
@@ -88,4 +86,4 @@ export const getServerSideProps = withIronSession(
   }
 );
 
-export default TradeFinder;
+export default ReverseEngineeringRoi;

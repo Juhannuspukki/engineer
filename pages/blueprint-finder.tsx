@@ -1,7 +1,7 @@
 import React from "react";
 import { withIronSession } from "next-iron-session";
+import ShipBlueprints from "../data/shipBlueprints";
 import marketData from "../data/marketData";
-import itemIdentifiers from "../data/itemIdentifiers";
 import SortableTable from "../components/sortableTable";
 import Layout from "../components/Layout";
 
@@ -29,22 +29,14 @@ const tableHeaders = [
     name: "Sell Ƶ",
     id: "sell",
   },
-  {
-    name: "Delta Ƶ",
-    id: "delta",
-  },
-  {
-    name: "Delta %",
-    id: "delta%",
-  },
 ];
 
-const TradeFinder: React.FC<DataProps> = ({ filteredResults }) => {
+const BlueprintFinder: React.FC<DataProps> = ({ filteredResults }) => {
   return (
     <Layout>
       <div className={"container large-container"}>
         <div className={"padded-container"}>
-          <h1>Trade Finder</h1>
+          <h1>Cheap Blueprint Finder</h1>
           {filteredResults !== null && (
             <SortableTable data={filteredResults} tableHeaders={tableHeaders} />
           )}
@@ -59,17 +51,17 @@ export const getServerSideProps = withIronSession(
     const user = req.session.get("user");
 
     if (user === undefined) {
-      res.setHeader("location", "/login?redirect=trade-finder");
+      res.setHeader("location", "/login?redirect=blueprint-finder");
       res.statusCode = 302;
       res.end();
       return { props: {} };
     }
 
-    const idList = itemIdentifiers.map((item) => item.id.toString());
+    const ships = ShipBlueprints.map((item) => item.name + " Blueprint");
 
-    const filteredResults = marketData.filter(
+    const filteredResults: MarketData[] = marketData.filter(
       (item: MarketData) =>
-        idList.includes(item.item_id) && !item.name.includes("Civilian")
+        item.name.includes("Blueprint") && !ships.includes(item.name)
     );
 
     return {
@@ -88,4 +80,4 @@ export const getServerSideProps = withIronSession(
   }
 );
 
-export default TradeFinder;
+export default BlueprintFinder;

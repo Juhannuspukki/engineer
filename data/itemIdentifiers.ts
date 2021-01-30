@@ -1,4 +1,4 @@
-// This file contains the data to reverse engineer all the blueprints in the game
+// This file contains all modules and their ID's
 
 const itemIdentifiers = [
     {

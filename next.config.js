@@ -1,5 +1,5 @@
 module.exports = {
   serverRuntimeConfig: {
-    mySecret: "SECRET_KEY",
+    accessKey: "SECRET_KEY",
   },
 };
